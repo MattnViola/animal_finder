@@ -1,0 +1,33 @@
+
+.title
+{
+    font-weight: bold;
+    text-align: center;
+}
+
+.bglayout
+{
+    background-image: url(Panda.png);
+    background-size: cover;
+}
+#map
+{
+    height: 100%;
+}
+.maincont
+{
+    margin: 25px;
+    border: solid 5px;
+    background-color: rgba(220, 53, 69, .75);
+}
+.inputform
+{
+    background-color: rgba(56, 118, 29, .75);
+    margin: 25px;
+    border: solid 5px;
+    text-align: center;
+    justify-content: space-evenly;
+}
+img {
+    opacity: 1;
+}

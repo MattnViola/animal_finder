@@ -1,0 +1,4 @@
+Flask 2.2.2 + extensions
+A Google Maps Platform API key
+python-dotenv
+googlemaps

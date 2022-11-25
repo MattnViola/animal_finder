@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Panda Finder
+{% endblock %}
+
+{% block head %}
+<style>
+  /* Always set the map height explicitly to define the size of the div
+   * element that contains the map. */
+  #map {
+    height: 100%;
+  }
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+<!-- Form to input address or geolocate. -->
+<div class="inputform">
+  <div class="row">
+    <div class="col">
+      <h1>Input your address</h1>
+    </div>
+    <div class="col">
+      <h1>Use GPS</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6">
+      <form action="/" method="post" class="input-group mb-3">
+        <input type="text" name='address_form' id="address_form" class="form-control pl-1" placeholder="Address">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <div class="col-6">
+      <button id="geolocate" type="button" class="btn btn-primary btn-lg">📍</button>
+    </div>
+  </div>
+</div>
+<div class="maincont mb-0 bg-success ">
+  <!-- Main content after form posted. -->
+  <div class= "row">
+    <div class="col-12 title">
+      <h1>Your closest panda is...</h1>
+    </div>
+    <div class="col title align-middle" style="height: 100%">
+      <h1 id="panda_name">{{ panda_name }}<h1>
+    </div>
+    <div class="col-4">
+      {% if panda_name == 'Yang Yang' %}
+      <img src='static/yang_yang.jpg' id="panda_portrait" class="img-fluid" alt="Panda Portrait">
+      {% elif panda_name == 'Le Le' %}
+      <img src='static/lele.jpg' id="panda_portrait" class="img-fluid" alt="Panda Portrait">
+      {% elif panda_name == 'Bao Bao' %}
+      <img src='static/Bao_Bao.jpg' id="panda_portrait" class="img-fluid" alt="Panda Portrait">
+      {% else %}
+      <img src="" id="panda_portrait" class="img-fluid" alt="Panda Portrait">
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div class="maincont bg-success  mt-1">
+  <div class="md" style="height: 480px;" id="map"></div>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9cKfZgISmu5Iix-xQVs6JZJzbHBzDuMo&callback=initMap"
+    async defer></script>
+</div>
+{% if origin %}
+<div class="invisible" id="origin">{{ origin }}</div>
+{% else %}
+<div class="invisible" id="origin">123</div>
+{% endif %}
+{% if destination %}
+<div class="invisible" id="destination">{{ destination }}</div>
+{% else %}
+<div class="invisible" id="destination">123</div>
+{% endif %}
+
+{% endblock %}
