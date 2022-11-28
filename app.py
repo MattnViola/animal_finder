@@ -1,21 +1,20 @@
-from __future__ import print_function
-import sys
 from flask import Flask, render_template, request
 import os
 from dotenv import load_dotenv
 import googlemaps
 from datetime import datetime
+import sqlite3
 
 # Initialize flask app
 app = Flask(__name__)
 
+# Initialize google-maps-services-python
 load_dotenv()
 google_api = os.getenv('google_api')
-
-# Initialize google-maps-services-python
 gmaps = googlemaps.Client(key=google_api)
 
-display_map = "https://maps.googleapis.com/maps/api/js?key=" + google_api + "&callback=initMap"
+
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -26,7 +25,7 @@ def index():
             start_address = request.form['address_form']
             zoo = closest_zoo(start_address)   
             
-            return render_template('index.html', origin=start_address, destination=zoo[1], panda_name=panda_names[zoo[0]])
+            return render_template('index.html', origin=start_address, panda_name=zoo[0], zoo_name=zoo[1], destination=zoo[3])
         # If the geolocate button is used
         except:
             # A JSON of the longitude and Latitude are sent here after pressing geolocate button.
@@ -40,34 +39,27 @@ def index():
 
             return {
                 "origin" : origin,
-                 "destination" : zoo[1],
-                 "panda_name" : panda_names[zoo[0]],
-                 "panda_portrait_src" : panda_portrait_src[panda_names[zoo[0]]],
+                 "destination" : zoo[3],
+                 "panda_name" : zoo[0],
+                 "panda_portrait_src" : zoo[2],
+                 "zoo_name" : zoo[1],
             }
 
     else:
 
         return render_template("index.html")
 
-
-@app.route("/geobutton", methods=["GET", "POST"])
-def geobutton():
-    # A JSON of the longitude and Latitude are sent here after pressing geolocate button.
-    # Send it to helper function to determine closest zoo.
-    coords = request.get_json()
-    print(coords, file=sys.stderr)
-    lat = coords['latitude']
-    long = coords['longitude']
-    origin = f"{lat}, {long}"
-    print(origin, file=sys.stderr)
-    zoo = closest_zoo(origin)
-
-    return render_template('index.html', origin=origin, destination=zoo[1], panda_name=panda_names[zoo[0]])
-    
-
 # Finds the closest zoo in USA with a panda based off origin.
 def closest_zoo(origin):
     
+    # Initialize database and retrieve a list of zoo addresses.
+    con = sqlite3.connect("panda_finder.db")
+    panda_db = con.cursor()
+    con = sqlite3.connect("panda_finder.db")
+    con.row_factory = lambda cursor, row: row[0]
+    panda_db = con.cursor()
+    zoo_addresses = panda_db.execute("SELECT address FROM panda_info").fetchall()
+
      # Return a matrix object with the distances from the origin to each of the destinations.
     zoo_distances = gmaps.distance_matrix(origin, zoo_addresses)
     
@@ -79,16 +71,13 @@ def closest_zoo(origin):
         if zoo_distances_elements[i]['distance']['value'] < least_distance or least_distance == 0:
             least_distance = zoo_distances_elements[i]['distance']['value']
             zoo_identifier = i
-    return [zoo_names[zoo_identifier], zoo_addresses[zoo_identifier]]
+    
+    # Retrieve the rest of the zoo info after identifying the closest zoo
+    panda_name = panda_db.execute("SELECT name FROM panda_info WHERE address=?", (zoo_addresses[zoo_identifier],)).fetchone()
+    zoo_name = panda_db.execute("SELECT zoo FROM panda_info WHERE address=?", (zoo_addresses[zoo_identifier],)).fetchone()
+    portrait_src = panda_db.execute("SELECT portrait_src FROM panda_info WHERE address=?", (zoo_addresses[zoo_identifier],)).fetchone()
 
-
-
-zoo_names = ['Zoo Atlanta', 'Memphis Zoo', 'Smithsonian National Zoo']
-zoo_addresses = ["800 Cherokee Ave SE, Atlanta, GA 30315", 
-     "2000 Prentiss Pl, Memphis, TN 38112", "3001 Connecticut Ave NW, Washington, DC 20008"]
-# Panda name based off zoo name.
-panda_names = {'Zoo Atlanta' : 'Yang Yang', 'Memphis Zoo' : 'Le Le', 'Smithsonian National Zoo' : 'Bao Bao'}
-panda_portrait_src = {'Yang Yang' : 'static/yang_yang.jpg', 'Le Le' : 'static/lele.jpg', 'Bao Bao' : 'static/Bao_Bao.jpg'}
+    return [panda_name, zoo_name, portrait_src, zoo_addresses[zoo_identifier]]
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

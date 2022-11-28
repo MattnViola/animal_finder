@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Update #panda_name and #panda_portrait
       document.getElementById('panda_name').innerHTML = panda_info["panda_name"];
       document.getElementById('panda_portrait').src = panda_info["panda_portrait_src"]
+      document.getElementById('zoo_name').innerHTML += panda_info["zoo_name"];
       // Initialize map client again and render route.
       var directionsService = new google.maps.DirectionsService();
       var directionsRenderer = new google.maps.DirectionsRenderer();
@@ -61,6 +62,10 @@ document.addEventListener("DOMContentLoaded", function () {
         zoom: 8
       });
       directionsRenderer.setMap(map);
+      // Make Panda info and map visible.
+      document.getElementById("maincont").classList.remove("invisible");
+      document.getElementById("mapdiv").classList.remove("invisible");
+      // Request directions from gmaps API.
       var request = {
         origin: panda_info["origin"],
         destination: panda_info["destination"],
