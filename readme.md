@@ -1,5 +1,4 @@
 # Animal_finder, a Flask App
-#### Video Demo: https://youtu.be/3rW0lrY3z5Y
 #### Description:
 
 This is a web app that will show the closest animal to yourself 
